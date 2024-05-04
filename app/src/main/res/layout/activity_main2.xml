@@ -64,7 +64,8 @@
             android:id="@+id/seekBarsLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"></LinearLayout>
+            android:orientation="vertical">
+        </LinearLayout>
     </ScrollView>
 
     <TextView
@@ -72,7 +73,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Your Borda Vote"
+        android:text="@string/your_borda_vote"
         android:textColor="#FF9800"
         android:textSize="24sp"
         android:textStyle="bold"

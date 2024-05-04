@@ -3,7 +3,6 @@ package de.fra_uas.fb2.mobiledevices.bordasvotingmethod
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
@@ -13,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 class MainActivity2 : AppCompatActivity() {
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,10 +24,20 @@ class MainActivity2 : AppCompatActivity() {
             insets
         }
 
+        val numberOptions = intent.getIntExtra("numberOptions", 0)
+        val options = intent.getStringArrayListExtra("options") ?: emptyList<String>()
+        val text = intent.getStringExtra("textOptions")
+        val savedNumberVotes = intent.getIntExtra("numberVotes", 0)
+
         val confirmVoteButton: Button = findViewById(R.id.ButtonConfirmVote)
+        val seekBarsLayout: LinearLayout = findViewById(R.id.seekBarsLayout)
 
         confirmVoteButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("numberOptions", numberOptions)
+            intent.putStringArrayListExtra("options", ArrayList(options))
+            intent.putExtra("textOptions", text)
+            intent.putExtra("numberVotes", savedNumberVotes )
             startActivity(intent)
         }
 
@@ -35,31 +45,14 @@ class MainActivity2 : AppCompatActivity() {
 
         cancelVoteButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
+            intent.putExtra("numberOptions", numberOptions)
+            intent.putStringArrayListExtra("options", ArrayList(options))
+            intent.putExtra("textOptions", text)
+            intent.putExtra("numberVotes", savedNumberVotes -1)
             startActivity(intent)
         }
 
-        val number = intent.getIntExtra("number", 0)
-        val seekBarsLayout: LinearLayout = findViewById(R.id.seekBarsLayout)
-        val options = intent.getStringArrayListExtra("options") ?: emptyList<String>()
-        val seekBarValues: MutableList<Int> = MutableList(options.size) { 0 }
-
-        val dynamicTextView: TextView = findViewById(R.id.textViewBordaVoteDynamic)
-
-        val seekBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                val index = seekBarsLayout.indexOfChild(seekBar?.parent as? LinearLayout) / 2
-                if (index >= 0 && index < seekBarValues.size) {
-                    seekBarValues[index] = progress
-                    println(progress)
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        }
-
-        for (i in 0 until number) {
+        for (i in 0 until numberOptions) {
             val seekBar = SeekBar(this)
             seekBar.progress = 0
             val seekBarName = if (i < options.size&&options[i]!="") options[i] else "Option ${i+1}"
@@ -67,7 +60,6 @@ class MainActivity2 : AppCompatActivity() {
             textView.text = seekBarName
             seekBarsLayout.addView(textView)
             seekBarsLayout.addView(seekBar)
-            seekBar.setOnSeekBarChangeListener(seekBarChangeListener)
         }
     }
 }

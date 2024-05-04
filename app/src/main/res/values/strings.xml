@@ -6,12 +6,13 @@
     <string name="voting_options">Voting Options:</string>
     <string name="number_of_options">Number of Options:</string>
     <string name="add_a_vote">Add a Vote</string>
-    <string name="enter_all_options_seperated_by_comma">Enter all options seperated by comma!</string>
+    <string name="enter_all_options_separated_by_comma">Enter all options separated by comma!</string>
     <string name="your_preferences">Your Preferences</string>
-    <string name="cancel">CANCEL</string>
+    <string name="cancel">Cancel</string>
     <string name="confirm_your_vote">CONFIRM YOUR VOTE</string>
     <string name="start_over">Start Over</string>
     <string name="number_of_votes_so_far">Number of Votes So Far:</string>
     <string name="show_voting_results">Show Voting Results</string>
     <string name="_0">0</string>
+    <string name="your_borda_vote">Your Borda Vote</string>
 </resources>

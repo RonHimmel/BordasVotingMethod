@@ -1,9 +1,9 @@
 package de.fra_uas.fb2.mobiledevices.bordasvotingmethod
-
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -20,28 +20,48 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        val savedNumberOptions = intent.getIntExtra("numberOptions", 0)
+        val savedOptions = intent.getStringArrayListExtra("options") ?: emptyList<String>()
+        val savedTextOptions = intent.getStringExtra("textOptions")
+        val savedNumberVotes = intent.getIntExtra("numberVotes", 0)
+
         val addVoteButton: Button = findViewById(R.id.ButtonAddVote)
-        val numberInputEditText: EditText = findViewById(R.id.EditTextOptionsNumber)
-        val textInputEditTextOptions : EditText = findViewById(R.id.EditTextOptions)
+        val intOptions: EditText = findViewById(R.id.EditTextOptionsNumber)
+        val textOptions : EditText = findViewById(R.id.EditTextOptions)
+        val startOverButton: Button = findViewById(R.id.ButtonStartOver)
+        val numberOfVotes: TextView = findViewById(R.id.TextViewVotesNumber)
+
+
+        numberOfVotes.text = savedNumberVotes.toString()
+        intOptions.setText(savedNumberOptions.toString())
+        textOptions.setText(savedTextOptions)
+
+        startOverButton.setOnClickListener{
+            intOptions.setText("0")
+            numberOfVotes.text = "0"
+            textOptions.setText("")
+        }
 
         addVoteButton.setOnClickListener {
-            val numberInput = numberInputEditText.text.toString()
+            val numberInput = intOptions.text.toString()
             if (numberInput.isNotEmpty()&&numberInput.toInt()>1&&numberInput.toInt()<11) {
-                val number = numberInput.toInt()
+                val numberOptions = numberInput.toInt()
+                val numberVotes = numberOfVotes.text.toString().toInt() + 1
                 val intent = Intent(this, MainActivity2::class.java)
-                intent.putExtra("number", number)
-                val inputText = textInputEditTextOptions.text.toString()
+                val inputText = textOptions.text.toString()
                 val options = inputText.split(",").map { it.trim() }                        //splits the string into the different options using the split method with ","
+                                                                                                        //sends all values to the other activity
                 intent.putStringArrayListExtra("options", ArrayList(options))
+                intent.putExtra("textOptions", inputText)
+                intent.putExtra("numberOptions", numberOptions)
+                intent.putExtra("numberVotes", numberVotes)
                 startActivity(intent)
             } else {
                 Toast.makeText(this, "Please enter a number from 2 to 10", Toast.LENGTH_SHORT).show()
             }
         }
-
-
-
-
     }
+
 }
 
