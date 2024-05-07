@@ -65,6 +65,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
+
         </LinearLayout>
     </ScrollView>
 
@@ -90,6 +91,7 @@
         android:layout_height="177dp"
         android:layout_marginTop="18dp"
         android:background="#9EFFC107"
+        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.494"
