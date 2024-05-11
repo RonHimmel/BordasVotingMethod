@@ -51,7 +51,8 @@ class MainActivity : AppCompatActivity() {
 
         addVoteButton.setOnClickListener {
             val numberInput = intOptions.text.toString()
-            if (numberInput.isNotEmpty()&&numberInput.toInt()>1&&numberInput.toInt()<11) {
+            if (numberInput.isNotEmpty()&&numberInput.toInt()>1&&numberInput.toInt()<11&&
+                !textOptions.text.contains("*invalid*")) {
                 val numberOptions = numberInput.toInt()
                 val numberVotes = numberOfVotes.text.toString().toInt() + 1                         //adds 1 to the voting counter
                 val intent = Intent(this, MainActivity2::class.java)
@@ -63,7 +64,9 @@ class MainActivity : AppCompatActivity() {
                 intent.putExtra("numberOptions", numberOptions)
                 intent.putExtra("numberVotes", numberVotes)
                 startActivity(intent)
-            } else {
+            } else if(textOptions.text.contains("*invalid*")){
+                Toast.makeText(this, "You can not name an option *invalid*", Toast.LENGTH_SHORT).show()
+            }else{
                 Toast.makeText(this, "Please enter a number from 2 to 10", Toast.LENGTH_SHORT).show()
             }
         }

@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -42,11 +43,21 @@ class MainActivity2 : AppCompatActivity() {
             intent.putExtra("numberOptions", numberOptions)
             intent.putStringArrayListExtra("options", ArrayList(options))
             intent.putExtra("textOptions", text)
-            if(a==1) {intent.putExtra("numberVotes", savedNumberVotes )
+            if(a==1) {intent.putExtra("numberVotes", savedNumberVotes )                         //if vote is cancelled we have to remove the counter vote added
             } else intent.putExtra("numberVotes", savedNumberVotes -1)
             intent.putExtra("pairList", updatedListString)
             startActivity(intent)
         }
+
+        fun checkIfUnique(value: Int, options: List<Triple<String, Int, Int>>): Boolean{
+            var test = 0
+            for(element in options){
+                if(value== element.second)
+                    test++
+            }
+            return test <= 1                                                                            //true if it is only true once ( with itself)
+        }
+
 
         fun calculateResults(){
             val tripleList = mutableListOf(
@@ -64,16 +75,21 @@ class MainActivity2 : AppCompatActivity() {
             val sortedList = tripleList.sortedByDescending { it.second }.toMutableList()
             for(y in 0 until numberOptions){
                 val existingPair = sortedList[y]
-                val updatedPair = Triple(existingPair.first, existingPair.second, numberOptions-y-1)
+                var checkNumber = 0
+                if(checkIfUnique(existingPair.second, sortedList)) checkNumber = numberOptions-y-1
+                else checkNumber =-2                                                                    //-2 means not unique
+                val updatedPair = Triple(existingPair.first, existingPair.second, checkNumber)
                 sortedList[y] = updatedPair
             }
-            updatedListString = sortedList.joinToString(separator = "\n") { "${it.first} -> ${it.third}" }
+            updatedListString = sortedList.joinToString(separator = "\n") {if(it.third!=-2){ "${it.first} -> ${it.third}" }else {"${it.first} -> *invalid*" }}
             voteScreen.text = updatedListString
 
         }
 
         confirmVoteButton.setOnClickListener {
-            intentions(1)
+            if(updatedListString.contains("*invalid*")){
+                Toast.makeText(this, "All Values have to be unique", Toast.LENGTH_SHORT).show()
+            }else intentions(1)
         }
         cancelVoteButton.setOnClickListener {
             intentions(0)
@@ -92,20 +108,17 @@ class MainActivity2 : AppCompatActivity() {
 
             val listener = object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    // Store the progress value in the array
                     seekBarValues[i] = progress
                     calculateResults()
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
-                    // Handle start tracking touch
+
                 }
 
                 override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                    // Handle stop tracking touch
                 }
             }
-            // Add the listener to the SeekBar
             bar.setOnSeekBarChangeListener(listener)
         }
     }
