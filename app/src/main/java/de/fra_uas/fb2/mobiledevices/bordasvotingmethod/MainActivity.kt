@@ -25,10 +25,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         val savedNumberOptions = intent.getIntExtra("numberOptions", 0)
-        val savedOptions = intent.getStringArrayListExtra("options") ?: emptyList<String>()
         val savedTextOptions = intent.getStringExtra("textOptions")
         val savedNumberVotes = intent.getIntExtra("numberVotes", 0)
         val savedPairList = intent.getStringExtra("pairList")
+        val savedStringList = intent.getStringArrayListExtra("savedStringList")
 
         val addVoteButton: Button = findViewById(R.id.ButtonAddVote)
         val intOptions: EditText = findViewById(R.id.EditTextOptionsNumber)
@@ -63,6 +63,8 @@ class MainActivity : AppCompatActivity() {
                 intent.putExtra("textOptions", inputText)
                 intent.putExtra("numberOptions", numberOptions)
                 intent.putExtra("numberVotes", numberVotes)
+                intent.putStringArrayListExtra("savedStringList",
+                    savedStringList?.let { it1 -> ArrayList(it1) })
                 startActivity(intent)
             } else if(textOptions.text.contains("*invalid*")){
                 Toast.makeText(this, "You can not name an option *invalid*", Toast.LENGTH_SHORT).show()

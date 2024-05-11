@@ -22,11 +22,30 @@ class MainActivity2 : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        val stringToPairList = mutableListOf<Pair<String, Int>>()
 
         val numberOptions = intent.getIntExtra("numberOptions", 0)
         val options = intent.getStringArrayListExtra("options") ?: emptyList<String>()
         val text = intent.getStringExtra("textOptions")
         val savedNumberVotes = intent.getIntExtra("numberVotes", 0)
+        if(savedNumberVotes>1) {
+            val savedStringList =
+                intent.getStringArrayListExtra("savedStringList") ?: emptyList<String>()
+                savedStringList.forEach { string ->
+                    val parts = string.split(",")
+                    if (parts.size == 2) {
+                        val first = parts[0]
+                        val second = parts[1].toInt()
+                        stringToPairList.add(Pair(first, second))
+                    }
+            }
+        }else{
+            val savedStringList = ArrayList<String>()
+            for(i in 0 until numberOptions){
+                stringToPairList.add(Pair("", 0))
+            }
+        }
+
 
         val confirmVoteButton: Button = findViewById(R.id.ButtonConfirmVote)
         val cancelVoteButton: Button = findViewById(R.id.ButtonCancelVote)
@@ -36,6 +55,8 @@ class MainActivity2 : AppCompatActivity() {
         var updatedListString = ""
         val seekBarValues = IntArray(numberOptions)
         val seekBar = ArrayList<SeekBar>(numberOptions)
+        val stringList = ArrayList<String>()
+        var newStringToPairList = mutableListOf<Pair<String, Int>>()
 
 
         fun intentions(a: Int){
@@ -46,6 +67,7 @@ class MainActivity2 : AppCompatActivity() {
             if(a==1) {intent.putExtra("numberVotes", savedNumberVotes )                         //if vote is cancelled we have to remove the counter vote added
             } else intent.putExtra("numberVotes", savedNumberVotes -1)
             intent.putExtra("pairList", updatedListString)
+            intent.putStringArrayListExtra("savedStringList", ArrayList(stringList))
             startActivity(intent)
         }
 
@@ -74,22 +96,44 @@ class MainActivity2 : AppCompatActivity() {
             }
             val sortedList = tripleList.sortedByDescending { it.second }.toMutableList()
             for(y in 0 until numberOptions){
-                val existingPair = sortedList[y]
+                val existingTriple = sortedList[y]
                 var checkNumber = 0
-                if(checkIfUnique(existingPair.second, sortedList)) checkNumber = numberOptions-y-1
+                if(checkIfUnique(existingTriple.second, sortedList)) checkNumber = numberOptions-y-1
                 else checkNumber =-2                                                                    //-2 means not unique
-                val updatedPair = Triple(existingPair.first, existingPair.second, checkNumber)
-                sortedList[y] = updatedPair
+                val updatedTriple = Triple(existingTriple.first, existingTriple.second, checkNumber)
+                sortedList[y] = updatedTriple
             }
             updatedListString = sortedList.joinToString(separator = "\n") {if(it.third!=-2){ "${it.first} -> ${it.third}" }else {"${it.first} -> *invalid*" }}
             voteScreen.text = updatedListString
+            if(!updatedListString.contains("*invalid*")){
+                val alphabeticList = sortedList.sortedByDescending { it.first }.toMutableList()
+                for(i in 0 until numberOptions){
+                    stringList.add("${alphabeticList[i].first},${alphabeticList[i].third}")
+                }
+                stringList.forEach { string ->
+                    val parts = string.split(",")
+                    if (parts.size == 2) {
+                        val first = parts[0]
+                        val second = parts[1].toInt()
+                        newStringToPairList.add(Pair(first, second))
+                    }
+                }
+            }
 
         }
 
         confirmVoteButton.setOnClickListener {
             if(updatedListString.contains("*invalid*")){
                 Toast.makeText(this, "All Values have to be unique", Toast.LENGTH_SHORT).show()
-            }else intentions(1)
+            }else {
+                for(i in 0 until numberOptions){
+                    newStringToPairList[i] = Pair(newStringToPairList[i].first, newStringToPairList[i].second+stringToPairList[i].second )
+                    stringList[i]="${newStringToPairList[i].first},${newStringToPairList[i].second}"
+                }
+                newStringToPairList = newStringToPairList.sortedByDescending { it.second }.toMutableList()
+                updatedListString = newStringToPairList.joinToString (separator = "\n"){"${it.first} -> ${it.second}"}
+                intentions(1)
+            }
         }
         cancelVoteButton.setOnClickListener {
             intentions(0)
