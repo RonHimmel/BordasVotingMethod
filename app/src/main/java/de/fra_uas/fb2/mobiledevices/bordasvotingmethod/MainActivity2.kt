@@ -29,15 +29,14 @@ class MainActivity2 : AppCompatActivity() {
         val text = intent.getStringExtra("textOptions")
         val savedNumberVotes = intent.getIntExtra("numberVotes", 0)
         if(savedNumberVotes>1) {
-            val savedStringList =
-                intent.getStringArrayListExtra("savedStringList") ?: emptyList<String>()
-                savedStringList.forEach { string ->
-                    val parts = string.split(",")
-                    if (parts.size == 2) {
-                        val first = parts[0]
-                        val second = parts[1].toInt()
-                        stringToPairList.add(Pair(first, second))
-                    }
+            val savedStringList = intent.getStringArrayListExtra("savedStringList") ?: emptyList<String>()
+            savedStringList.forEach { string ->
+                val parts = string.split(",")
+                if (parts.size == 2) {
+                    val first = parts[0]
+                    val second = parts[1].toInt()
+                    stringToPairList.add(Pair(first, second))
+                }
             }
         }else{
             val savedStringList = ArrayList<String>()
@@ -103,13 +102,15 @@ class MainActivity2 : AppCompatActivity() {
                 val updatedTriple = Triple(existingTriple.first, existingTriple.second, checkNumber)
                 sortedList[y] = updatedTriple
             }
-            updatedListString = sortedList.joinToString(separator = "\n") {if(it.third!=-2){ "${it.first} -> ${it.third}" }else {"${it.first} -> *invalid*" }}
+            updatedListString = sortedList.joinToString(separator = "\n") {if(it.third!=-2){ "${it.first} -> ${it.third}" }else {"${it.first} -> <not unique>" }}
             voteScreen.text = updatedListString
-            if(!updatedListString.contains("*invalid*")){
+            if(!updatedListString.contains("<not unique>")){
                 val alphabeticList = sortedList.sortedByDescending { it.first }.toMutableList()
+                stringList.clear()
                 for(i in 0 until numberOptions){
                     stringList.add("${alphabeticList[i].first},${alphabeticList[i].third}")
                 }
+                newStringToPairList.clear()                                                         //the list has to be emptied first
                 stringList.forEach { string ->
                     val parts = string.split(",")
                     if (parts.size == 2) {
@@ -123,8 +124,8 @@ class MainActivity2 : AppCompatActivity() {
         }
 
         confirmVoteButton.setOnClickListener {
-            if(updatedListString.contains("*invalid*")){
-                Toast.makeText(this, "All Values have to be unique", Toast.LENGTH_SHORT).show()
+            if(updatedListString.contains("<not unique>")){
+                Toast.makeText(this, "Vote is not unique!", Toast.LENGTH_SHORT).show()
             }else {
                 for(i in 0 until numberOptions){
                     newStringToPairList[i] = Pair(newStringToPairList[i].first, newStringToPairList[i].second+stringToPairList[i].second )
@@ -136,6 +137,7 @@ class MainActivity2 : AppCompatActivity() {
             }
         }
         cancelVoteButton.setOnClickListener {
+            Toast.makeText(this, "Vote has been canelled!", Toast.LENGTH_SHORT).show()
             intentions(0)
         }
 

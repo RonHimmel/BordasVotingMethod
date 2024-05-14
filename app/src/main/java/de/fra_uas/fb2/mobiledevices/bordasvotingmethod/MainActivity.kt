@@ -39,24 +39,31 @@ class MainActivity : AppCompatActivity() {
         val switchResults : Switch = findViewById(R.id.SwitchResults)
 
 
-        numberOfVotes.text = savedNumberVotes.toString()
-        intOptions.setText(savedNumberOptions.toString())
-        textOptions.setText(savedTextOptions)
+        numberOfVotes.text = savedNumberVotes.toString()                                            // if we came from the second activity the # of votes is rewritten
+        intOptions.setText(savedNumberOptions.toString())                                           // also the # of options are displayed again
+        textOptions.setText(savedTextOptions)                                                       // and the options
 
-        startOverButton.setOnClickListener{
+        startOverButton.setOnClickListener{                                                  // here we delete all user inputs to start a new vote
             intOptions.setText("0")
             numberOfVotes.text = "0"
             textOptions.setText("")
         }
 
+        textOptions.setOnClickListener{
+            if(savedNumberVotes!=0&&intOptions.text.toString().toInt()!=savedNumberVotes){          //if its not the first vote and the number of options is changed we have to restart
+                numberOfVotes.text = "0"
+                textOptions.setText("")
+            }
+        }
+
         addVoteButton.setOnClickListener {
             val numberInput = intOptions.text.toString()
             if (numberInput.isNotEmpty()&&numberInput.toInt()>1&&numberInput.toInt()<11&&
-                !textOptions.text.contains("*invalid*")) {
+                !textOptions.text.contains("<not unique>")) {
                 val numberOptions = numberInput.toInt()
                 val numberVotes = numberOfVotes.text.toString().toInt() + 1                         //adds 1 to the voting counter
                 val intent = Intent(this, MainActivity2::class.java)
-                val inputText = textOptions.text.toString()
+                val inputText = savedTextOptions ?: textOptions.text.toString()
                 val options = inputText.split(",").map { it.trim() }                        //splits the string into the different options using the split method with ","
                                                                                                         //sends all values to the other activity
                 intent.putStringArrayListExtra("options", ArrayList(options))
@@ -66,8 +73,8 @@ class MainActivity : AppCompatActivity() {
                 intent.putStringArrayListExtra("savedStringList",
                     savedStringList?.let { it1 -> ArrayList(it1) })
                 startActivity(intent)
-            } else if(textOptions.text.contains("*invalid*")){
-                Toast.makeText(this, "You can not name an option *invalid*", Toast.LENGTH_SHORT).show()
+            } else if(textOptions.text.contains("<not unique>")){
+                Toast.makeText(this, "You can not name an option <not unique>", Toast.LENGTH_SHORT).show()
             }else{
                 Toast.makeText(this, "Please enter a number from 2 to 10", Toast.LENGTH_SHORT).show()
             }
@@ -75,15 +82,6 @@ class MainActivity : AppCompatActivity() {
 
         switchResults.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked&&numberOfVotes.text!="0") {
-                /*var results = ""
-                for (i in 0 until savedNumberOptions) {
-                    results = if (i < savedOptions.size && savedOptions[i] != "") {
-                        results + savedOptions[i] + "\n"
-                    } else {
-                        results + "Option ${i + 1}" + "\n"
-                    }
-                    resultVotes.text = results
-                }*/
                 resultVotes.text = savedPairList
             }else resultVotes.text = ""
         }
