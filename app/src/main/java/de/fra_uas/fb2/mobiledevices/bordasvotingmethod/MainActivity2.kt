@@ -39,7 +39,7 @@ class MainActivity2 : AppCompatActivity() {
                 }
             }
         }else{
-            val savedStringList = ArrayList<String>()
+            ArrayList<String>()
             for(i in 0 until numberOptions){
                 stringToPairList.add(Pair("", 0))
             }
@@ -63,10 +63,16 @@ class MainActivity2 : AppCompatActivity() {
             intent.putExtra("numberOptions", numberOptions)
             intent.putStringArrayListExtra("options", ArrayList(options))
             intent.putExtra("textOptions", text)
-            if(a==1) {intent.putExtra("numberVotes", savedNumberVotes )                         //if vote is cancelled we have to remove the counter vote added
-            } else intent.putExtra("numberVotes", savedNumberVotes -1)
-            intent.putExtra("pairList", updatedListString)
-            intent.putStringArrayListExtra("savedStringList", ArrayList(stringList))
+            if(a==1) {
+                intent.putExtra("numberVotes", savedNumberVotes )
+                intent.putExtra("pairList", updatedListString)
+                intent.putStringArrayListExtra("savedStringList", ArrayList(stringList))
+            } else {
+                intent.putExtra("numberVotes", savedNumberVotes -1)                 //if vote is cancelled we have to remove the counter vote added
+                intent.putExtra("pairList", stringToPairList.sortedByDescending { it.second }
+                    .joinToString (separator = "\n"){"${it.first} -> ${it.second}"})
+                intent.putStringArrayListExtra("savedStringList", ArrayList(stringList))
+            }
             startActivity(intent)
         }
 
@@ -138,6 +144,10 @@ class MainActivity2 : AppCompatActivity() {
         }
         cancelVoteButton.setOnClickListener {
             Toast.makeText(this, "Vote has been canelled!", Toast.LENGTH_SHORT).show()
+            stringList.clear()
+            for(i in 0 until numberOptions){
+                stringList.add("${stringToPairList[i].first},${stringToPairList[i].second}")
+            }
             intentions(0)
         }
 

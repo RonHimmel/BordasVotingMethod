@@ -87,7 +87,18 @@ class MainActivity : AppCompatActivity() {
 
         switchResults.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked&&numberOfVotes.text!="0") {
-                resultVotes.text = savedPairList
+                var resultText = ""
+                val result = savedPairList?.split("->", "\n")?.map { it.trim() }
+                var i = 0
+                if (result != null) {
+                    do{
+                        if(result[i+1]==result[1]){
+                            resultText=resultText+"***"+result[i]+ " -> "+ result[i+1]+"***\n"
+                        }else resultText=resultText +result[i]+" -> "+ result[i+1]+"\n"
+                        i += 2
+                    }while(i<result.size)
+                }
+                resultVotes.text = resultText
             }else resultVotes.text = ""
         }
 
