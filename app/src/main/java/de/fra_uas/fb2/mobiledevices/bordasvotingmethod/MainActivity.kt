@@ -25,9 +25,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         val savedNumberOptions = intent.getIntExtra("numberOptions", 0)
-        val savedTextOptions = intent.getStringExtra("textOptions")
+        var savedTextOptions = intent.getStringExtra("textOptions")
         val savedNumberVotes = intent.getIntExtra("numberVotes", 0)
-        val savedPairList = intent.getStringExtra("pairList")
+        var savedPairList = intent.getStringExtra("pairList")
         val savedStringList = intent.getStringArrayListExtra("savedStringList")
 
         val addVoteButton: Button = findViewById(R.id.ButtonAddVote)
@@ -47,6 +47,9 @@ class MainActivity : AppCompatActivity() {
             intOptions.setText("0")
             numberOfVotes.text = "0"
             textOptions.setText("")
+            savedStringList?.clear()
+            savedPairList=""
+            savedTextOptions=""
         }
 
         textOptions.setOnClickListener{
@@ -63,15 +66,17 @@ class MainActivity : AppCompatActivity() {
                 val numberOptions = numberInput.toInt()
                 val numberVotes = numberOfVotes.text.toString().toInt() + 1                         //adds 1 to the voting counter
                 val intent = Intent(this, MainActivity2::class.java)
-                val inputText = savedTextOptions ?: textOptions.text.toString()
-                val options = inputText.split(",").map { it.trim() }                        //splits the string into the different options using the split method with ","
+                val inputText = if(savedTextOptions!=null&&savedTextOptions!="")savedTextOptions
+                                else textOptions.text.toString()
+                val options = inputText?.split(",")?.map { it.trim() }                        //splits the string into the different options using the split method with ","
                                                                                                         //sends all values to the other activity
                 intent.putStringArrayListExtra("options", ArrayList(options))
                 intent.putExtra("textOptions", inputText)
                 intent.putExtra("numberOptions", numberOptions)
                 intent.putExtra("numberVotes", numberVotes)
-                intent.putStringArrayListExtra("savedStringList",
-                    savedStringList?.let { it1 -> ArrayList(it1) })
+                if(savedStringList!=null) {
+                    intent.putStringArrayListExtra("savedStringList", ArrayList(savedStringList))
+                }
                 startActivity(intent)
             } else if(textOptions.text.contains("<not unique>")){
                 Toast.makeText(this, "You can not name an option <not unique>", Toast.LENGTH_SHORT).show()
