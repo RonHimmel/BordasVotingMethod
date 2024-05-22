@@ -2,6 +2,8 @@ package de.fra_uas.fb2.mobiledevices.bordasvotingmethod
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
@@ -11,6 +13,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.addTextChangedListener
 
 class MainActivity : AppCompatActivity() {
     @SuppressLint("UseSwitchCompatOrMaterialCode")
@@ -39,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         val switchResults : Switch = findViewById(R.id.SwitchResults)
 
 
-        numberOfVotes.text = savedNumberVotes.toString()                                            // if we came from the second activity the # of votes is rewritten
+        numberOfVotes.text = savedNumberVotes.toString()                                            // if we come from the second activity the # of votes is rewritten
         intOptions.setText(savedNumberOptions.toString())                                           // also the # of options are displayed again
         textOptions.setText(savedTextOptions)                                                       // and the options
 
@@ -52,12 +55,51 @@ class MainActivity : AppCompatActivity() {
             savedTextOptions=""
         }
 
-        textOptions.setOnClickListener{
-            if(savedNumberVotes!=0&&intOptions.text.toString().toInt()!=savedNumberVotes){          //if its not the first vote and the number of options is changed we have to restart
-                numberOfVotes.text = "0"
-                textOptions.setText("")
+        var isClear = true
+
+        textOptions.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // This method is called to notify you that the text is about to change
             }
-        }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // This method is called to notify you that the text has changed
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // This method is called to notify you that somewhere within s, the text has been changed
+                if(isClear) {
+                    numberOfVotes.text = "0"
+                    savedStringList?.clear()
+                    savedPairList = ""
+                    savedTextOptions = ""
+                    isClear=false
+                }
+            }
+        })
+
+        intOptions.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                // This method is called to notify you that the text is about to change
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                // This method is called to notify you that the text has changed
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                // This method is called to notify you that somewhere within s, the text has been changed
+                if(isClear) {
+                    numberOfVotes.text = "0"
+                    savedStringList?.clear()
+                    savedPairList = ""
+                    savedTextOptions = ""
+                    isClear=false
+                }
+            }
+        })
 
         addVoteButton.setOnClickListener {
             val numberInput = intOptions.text.toString()
@@ -85,7 +127,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        switchResults.setOnCheckedChangeListener { _, isChecked ->
+        switchResults.setOnCheckedChangeListener { _, isChecked ->                                  //function for the switch
             if (isChecked&&numberOfVotes.text!="0") {
                 var resultText = ""
                 val result = savedPairList?.split("->", "\n")?.map { it.trim() }

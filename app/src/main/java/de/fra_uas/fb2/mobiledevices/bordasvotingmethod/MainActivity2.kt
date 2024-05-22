@@ -130,7 +130,7 @@ class MainActivity2 : AppCompatActivity() {
         }
 
         confirmVoteButton.setOnClickListener {
-            if(updatedListString.contains("<not unique>")){
+            if(updatedListString.contains("<not unique>")||voteScreen.text==""){
                 Toast.makeText(this, "Vote is not unique!", Toast.LENGTH_SHORT).show()
             }else {
                 for(i in 0 until numberOptions){
