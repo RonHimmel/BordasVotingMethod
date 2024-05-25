@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
@@ -64,6 +65,15 @@ class MainActivity : AppCompatActivity() {
                     intOptions.setText(savedNumberOptions.toString())                                           // also the # of options are displayed again
                     textOptions.setText(savedTextOptions)
                     isClear = true
+                    switchResults.isChecked = false
+                                                                                                        //ensures to close the keyboard
+                    intOptions.clearFocus()
+                    textOptions.clearFocus()
+                    val view = this.currentFocus
+                    if (view != null) {
+                        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                        imm.hideSoftInputFromWindow(view.windowToken, 0)
+                    }
                 }
 
             } else if (result.resultCode == RESULT_CANCELED) {
@@ -79,6 +89,7 @@ class MainActivity : AppCompatActivity() {
             savedStringList?.clear()
             savedPairList=""
             savedTextOptions=""
+            switchResults.isChecked = false
         }
 
 
@@ -101,6 +112,7 @@ class MainActivity : AppCompatActivity() {
                     savedPairList = ""
                     savedTextOptions = ""
                     isClear=false
+                    intOptions.text.clear()
                 }
             }
         })
@@ -123,6 +135,7 @@ class MainActivity : AppCompatActivity() {
                     savedPairList = ""
                     savedTextOptions = ""
                     isClear=false
+                    textOptions.text.clear()
                 }
             }
         })
