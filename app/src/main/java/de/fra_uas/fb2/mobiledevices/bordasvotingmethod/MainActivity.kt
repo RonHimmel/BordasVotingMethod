@@ -10,12 +10,24 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.widget.addTextChangedListener
+
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var activityLauncher: ActivityResultLauncher<Intent>
+    private var savedNumberOptions = 0
+    private var savedTextOptions: String? = null
+    private var savedNumberVotes = 0
+    private var savedPairList: String? = null
+    private var savedStringList: ArrayList<String>? = null
+    private var isClear = true
+
+
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,11 +39,6 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val savedNumberOptions = intent.getIntExtra("numberOptions", 0)
-        var savedTextOptions = intent.getStringExtra("textOptions")
-        val savedNumberVotes = intent.getIntExtra("numberVotes", 0)
-        var savedPairList = intent.getStringExtra("pairList")
-        val savedStringList = intent.getStringArrayListExtra("savedStringList")
 
         val addVoteButton: Button = findViewById(R.id.ButtonAddVote)
         val intOptions: EditText = findViewById(R.id.EditTextOptionsNumber)
@@ -42,9 +49,28 @@ class MainActivity : AppCompatActivity() {
         val switchResults : Switch = findViewById(R.id.SwitchResults)
 
 
-        numberOfVotes.text = savedNumberVotes.toString()                                            // if we come from the second activity the # of votes is rewritten
-        intOptions.setText(savedNumberOptions.toString())                                           // also the # of options are displayed again
-        textOptions.setText(savedTextOptions)                                                       // and the options
+        activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val extras = result.data?.extras
+                if (extras != null){
+                    savedNumberOptions = extras.getInt("numberOptions", 0) ?: 0
+                    savedTextOptions = extras.getString("textOptions")
+                    savedNumberVotes = extras.getInt("numberVotes", 0) ?: 0
+                    savedPairList = extras.getString("pairList")
+                    savedStringList = extras.getStringArrayList("savedStringList")
+
+                    isClear =false
+                    numberOfVotes.text = savedNumberVotes.toString()                                            // if we come from the second activity the # of votes is rewritten
+                    intOptions.setText(savedNumberOptions.toString())                                           // also the # of options are displayed again
+                    textOptions.setText(savedTextOptions)
+                    isClear = true
+                }
+
+            } else if (result.resultCode == RESULT_CANCELED) {
+                // Handle cancellation if needed
+            }
+        }
+
 
         startOverButton.setOnClickListener{                                                  // here we delete all user inputs to start a new vote
             intOptions.setText("0")
@@ -55,7 +81,7 @@ class MainActivity : AppCompatActivity() {
             savedTextOptions=""
         }
 
-        var isClear = true
+
 
         textOptions.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
@@ -107,19 +133,25 @@ class MainActivity : AppCompatActivity() {
                 !textOptions.text.contains("<not unique>")) {
                 val numberOptions = numberInput.toInt()
                 val numberVotes = numberOfVotes.text.toString().toInt() + 1                         //adds 1 to the voting counter
-                val intent = Intent(this, MainActivity2::class.java)
                 val inputText = if(savedTextOptions!=null&&savedTextOptions!="")savedTextOptions
                                 else textOptions.text.toString()
-                val options = inputText?.split(",")?.map { it.trim() }                        //splits the string into the different options using the split method with ","
-                                                                                                        //sends all values to the other activity
-                intent.putStringArrayListExtra("options", ArrayList(options))
-                intent.putExtra("textOptions", inputText)
-                intent.putExtra("numberOptions", numberOptions)
-                intent.putExtra("numberVotes", numberVotes)
+                val options =
+                    inputText?.split(",")?.map { it.trim() }                        //splits the string into the different options using the split method with ","
+
+                val myIntent = Intent(this, MainActivity2::class.java)
+                val bundle = Bundle();
+                bundle.putInt("numberOptions", numberOptions)
+                bundle.putInt("numberVotes", numberVotes)
+                bundle.putString("textOptions", inputText)
+                bundle.putStringArrayList("options", ArrayList(options!!))
                 if(savedStringList!=null) {
-                    intent.putStringArrayListExtra("savedStringList", ArrayList(savedStringList))
+                    bundle.putStringArrayList("savedStringList", ArrayList(savedStringList))
                 }
-                startActivity(intent)
+                myIntent.putExtras(bundle)
+                activityLauncher.launch(myIntent)
+
+
+                                                                                                        //sends all values to the other activity
             } else if(textOptions.text.contains("<not unique>")){
                 Toast.makeText(this, "You can not name an option <not unique>", Toast.LENGTH_SHORT).show()
             }else{
