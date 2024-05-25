@@ -24,13 +24,18 @@ class MainActivity2 : AppCompatActivity() {
         }
         val stringToPairList = mutableListOf<Pair<String, Int>>()
 
-        val numberOptions = intent.getIntExtra("numberOptions", 0)
-        val options = intent.getStringArrayListExtra("options") ?: emptyList<String>()
-        val text = intent.getStringExtra("textOptions")
-        val savedNumberVotes = intent.getIntExtra("numberVotes", 0)
+
+        val bundle = intent.extras
+        val numberOptions = bundle!!.getInt("numberOptions") ?: 0
+        val options = bundle.getStringArrayList("options")
+        val text = bundle.getString("textOptions")
+        val savedNumberVotes = bundle.getInt("numberVotes") ?: 0
+
+
+
         if(savedNumberVotes>1) {
-            val savedStringList = intent.getStringArrayListExtra("savedStringList") ?: emptyList<String>()
-            savedStringList.forEach { string ->
+            val savedStringList = bundle.getStringArrayList("savedStringList")
+            savedStringList?.forEach { string ->
                 val parts = string.split(",")
                 if (parts.size == 2) {
                     val first = parts[0]
@@ -59,21 +64,21 @@ class MainActivity2 : AppCompatActivity() {
 
 
         fun intentions(a: Int){
-            val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("numberOptions", numberOptions)
-            intent.putStringArrayListExtra("options", ArrayList(options))
-            intent.putExtra("textOptions", text)
+            val resultIntent = Intent()
+            resultIntent.putExtra("numberOptions", numberOptions)
+            resultIntent.putExtra("textOptions", text)
             if(a==1) {
-                intent.putExtra("numberVotes", savedNumberVotes )
-                intent.putExtra("pairList", updatedListString)
-                intent.putStringArrayListExtra("savedStringList", ArrayList(stringList))
+                resultIntent.putExtra("numberVotes", savedNumberVotes )
+                resultIntent.putExtra("pairList", updatedListString)
+                resultIntent.putStringArrayListExtra("savedStringList", ArrayList(stringList))
             } else {
-                intent.putExtra("numberVotes", savedNumberVotes -1)                 //if vote is cancelled we have to remove the counter vote added
-                intent.putExtra("pairList", stringToPairList.sortedByDescending { it.second }
+                resultIntent.putExtra("numberVotes", savedNumberVotes -1)                 //if vote is cancelled we have to remove the counter vote added
+                resultIntent.putExtra("pairList", stringToPairList.sortedByDescending { it.second }
                     .joinToString (separator = "\n"){"${it.first} -> ${it.second}"})
-                intent.putStringArrayListExtra("savedStringList", ArrayList(stringList))
+                resultIntent.putStringArrayListExtra("savedStringList", ArrayList(stringList))
             }
-            startActivity(intent)
+            setResult(RESULT_OK, resultIntent)
+            finish()
         }
 
         fun checkIfUnique(value: Int, options: List<Triple<String, Int, Int>>): Boolean{
@@ -88,7 +93,7 @@ class MainActivity2 : AppCompatActivity() {
 
         fun calculateResults(){
             val tripleList = mutableListOf(
-                Triple(if(options[0]!="")options[0]else "Option 1", seekBarValues[0], 0)
+                Triple(if(options!![0]!="") options[0]else "Option 1", seekBarValues[0], 0)
             )
             for (j in 0 until numberOptions) {
                 if(j in 1 until numberOptions){
@@ -156,7 +161,7 @@ class MainActivity2 : AppCompatActivity() {
             bar.progress = 0
             seekBarValues[i] = bar.progress
             seekBar.add(bar)
-            val seekBarName = if (i < options.size&&options[i]!="") options[i] else "Option ${i+1}"
+            val seekBarName = if (i < options!!.size&& options[i]!="") options[i] else "Option ${i+1}"
             val textView = TextView(this)
             textView.text = seekBarName
             seekBarsLayout.addView(textView)
