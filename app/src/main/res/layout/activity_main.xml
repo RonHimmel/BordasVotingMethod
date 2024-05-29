@@ -71,7 +71,7 @@
         android:ems="10"
         android:inputType="number"
         android:autofillHints=""
-        android:hint="@string/_0"
+        android:hint="@string/_3"
         android:textAlignment="center"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"

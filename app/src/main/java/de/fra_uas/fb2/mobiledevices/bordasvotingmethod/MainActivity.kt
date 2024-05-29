@@ -43,41 +43,55 @@ class MainActivity : AppCompatActivity() {
 
         val addVoteButton: Button = findViewById(R.id.ButtonAddVote)
         val intOptions: EditText = findViewById(R.id.EditTextOptionsNumber)
-        val textOptions : EditText = findViewById(R.id.EditTextOptions)
+        val textOptions: EditText = findViewById(R.id.EditTextOptions)
         val startOverButton: Button = findViewById(R.id.ButtonStartOver)
         val numberOfVotes: TextView = findViewById(R.id.TextViewVotesNumber)
-        val resultVotes : TextView = findViewById(R.id.TextViewResults)
-        val switchResults : Switch = findViewById(R.id.SwitchResults)
+        val resultVotes: TextView = findViewById(R.id.TextViewResults)
+        val switchResults: Switch = findViewById(R.id.SwitchResults)
 
 
-        activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val extras = result.data?.extras
-                if (extras != null){
-                    savedNumberOptions = extras.getInt("numberOptions", 0) ?: 0
-                    savedTextOptions = extras.getString("textOptions")
-                    savedNumberVotes = extras.getInt("numberVotes", 0) ?: 0
-                    savedPairList = extras.getString("pairList")
-                    savedStringList = extras.getStringArrayList("savedStringList")
+        activityLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    val extras = result.data?.extras
+                    if (extras != null) {
+                        savedNumberOptions = extras.getInt("numberOptions", 0) ?: 0
+                        savedTextOptions = extras.getString("textOptions")
+                        savedNumberVotes = extras.getInt("numberVotes", 0) ?: 0
+                        savedPairList = extras.getString("pairList")
+                        savedStringList = extras.getStringArrayList("savedStringList")
 
-                    isClear =false
-                    numberOfVotes.text = savedNumberVotes.toString()                                            // if we come from the second activity the # of votes is rewritten
-                    intOptions.setText(savedNumberOptions.toString())                                           // also the # of options are displayed again
-                    textOptions.setText(savedTextOptions)
-                    isClear = true
-                    switchResults.isChecked = false
-                                                                                                        //ensures to close the keyboard
-                    intOptions.clearFocus()
-                    textOptions.clearFocus()
-                    val view = this.currentFocus
-                    if (view != null) {
-                        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-                        imm.hideSoftInputFromWindow(view.windowToken, 0)
+                        isClear = false
+                        numberOfVotes.text =
+                            savedNumberVotes.toString()                                            // if we come from the second activity the # of votes is rewritten
+                        intOptions.setText(savedNumberOptions.toString())                                           // also the # of options are displayed again
+                        textOptions.setText(savedTextOptions)
+                        isClear = true
+                        switchResults.isChecked = false
+                        //ensures to close the keyboard
+                        intOptions.clearFocus()
+                        textOptions.clearFocus()
+                        val view = this.currentFocus
+                        if (view != null) {
+                            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                            imm.hideSoftInputFromWindow(view.windowToken, 0)
+                        }
                     }
-                }
 
-            } else if (result.resultCode == RESULT_CANCELED) {
-                // Handle cancellation if needed
+                } else if (result.resultCode == RESULT_CANCELED) {
+                    // Handle cancellation if needed
+                }
+            }
+
+
+        intOptions.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                isClear=false
+                if (intOptions.text.toString().toInt()>10){
+                    intOptions.setText("10")
+                }else if(intOptions.text.toString().toInt()<2){
+                    intOptions.setText("2")
+                }
             }
         }
 
@@ -140,35 +154,40 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        fun goToSecondActivity(){
+            val numberInput = intOptions.text.toString()
+            val numberOptions = numberInput.toInt()
+            val numberVotes = numberOfVotes.text.toString().toInt() + 1                         //adds 1 to the voting counter
+            val inputText = if(savedTextOptions!=null&&savedTextOptions!="")savedTextOptions
+            else textOptions.text.toString()
+            val options =
+                inputText?.split(",")?.map { it.trim() }                        //splits the string into the different options using the split method with ","
+
+            val myIntent = Intent(this, MainActivity2::class.java)
+            val bundle = Bundle();
+            bundle.putInt("numberOptions", numberOptions)
+            bundle.putInt("numberVotes", numberVotes)
+            bundle.putString("textOptions", inputText)
+            bundle.putStringArrayList("options", ArrayList(options!!))
+            if(savedStringList!=null) {
+                bundle.putStringArrayList("savedStringList", ArrayList(savedStringList))
+            }
+            myIntent.putExtras(bundle)
+            activityLauncher.launch(myIntent)
+        }
+
         addVoteButton.setOnClickListener {
             val numberInput = intOptions.text.toString()
             if (numberInput.isNotEmpty()&&numberInput.toInt()>1&&numberInput.toInt()<11&&
                 !textOptions.text.contains("<not unique>")) {
-                val numberOptions = numberInput.toInt()
-                val numberVotes = numberOfVotes.text.toString().toInt() + 1                         //adds 1 to the voting counter
-                val inputText = if(savedTextOptions!=null&&savedTextOptions!="")savedTextOptions
-                                else textOptions.text.toString()
-                val options =
-                    inputText?.split(",")?.map { it.trim() }                        //splits the string into the different options using the split method with ","
-
-                val myIntent = Intent(this, MainActivity2::class.java)
-                val bundle = Bundle();
-                bundle.putInt("numberOptions", numberOptions)
-                bundle.putInt("numberVotes", numberVotes)
-                bundle.putString("textOptions", inputText)
-                bundle.putStringArrayList("options", ArrayList(options!!))
-                if(savedStringList!=null) {
-                    bundle.putStringArrayList("savedStringList", ArrayList(savedStringList))
-                }
-                myIntent.putExtras(bundle)
-                activityLauncher.launch(myIntent)
-
-
-                                                                                                        //sends all values to the other activity
+                goToSecondActivity()
             } else if(textOptions.text.contains("<not unique>")){
                 Toast.makeText(this, "You can not name an option <not unique>", Toast.LENGTH_SHORT).show()
             }else{
-                Toast.makeText(this, "Please enter a number from 2 to 10", Toast.LENGTH_SHORT).show()
+                isClear=false
+                intOptions.setText("3")
+                isClear=true
+                goToSecondActivity()
             }
         }
 
