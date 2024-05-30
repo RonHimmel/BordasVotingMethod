@@ -22,7 +22,7 @@ class MainActivity2 : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-        val stringToPairList = mutableListOf<Pair<String, Int>>()
+        val stringToPairList = mutableListOf<Pair<String, Int>>()                                       //list of the old values from the last vote
 
 
         val bundle = intent.extras
@@ -92,36 +92,36 @@ class MainActivity2 : AppCompatActivity() {
 
 
         fun calculateResults(){
-            val tripleList = mutableListOf(
+            val tripleList = mutableListOf(                                                             //used a List of Triples to always have the name, value of the seekbar and actual value in one place
                 Triple(if(options!![0]!="") options[0]else "Option 1", seekBarValues[0], 0)
             )
-            for (j in 0 until numberOptions) {
-                if(j in 1 until numberOptions){
-                    if(j < options.size && options[j] != "") {
-                        tripleList.add(Triple(options[j], seekBarValues[j], 0))
-                    }else{
-                        tripleList.add(Triple("Option ${j+1}", seekBarValues[j], 0))
-                    }
+            for (j in 1 until numberOptions) {
+                if(j < options.size && options[j] != "") {
+                    tripleList.add(Triple(options[j], seekBarValues[j], 0))
+                }else{
+                    tripleList.add(Triple("Option ${j+1}", seekBarValues[j], 0))
                 }
+
             }
-            val sortedList = tripleList.sortedByDescending { it.second }.toMutableList()
-            for(y in 0 until numberOptions){
+            val sortedList = tripleList.sortedByDescending { it.second }.toMutableList()                //sort the list by the seekbar value
+            for(y in 0 until numberOptions){                                                      //now i iterate through the list and check if the seekbar value is unique
                 val existingTriple = sortedList[y]
                 var checkNumber = 0
-                if(checkIfUnique(existingTriple.second, sortedList)) checkNumber = numberOptions-y-1
+                if(checkIfUnique(existingTriple.second, sortedList)) checkNumber = numberOptions-y-1    //if the seekbar value is unique it gets the borda value assigned according to its place in the sorted list
                 else checkNumber =-2                                                                    //-2 means not unique
                 val updatedTriple = Triple(existingTriple.first, existingTriple.second, checkNumber)
                 sortedList[y] = updatedTriple
             }
-            updatedListString = sortedList.joinToString(separator = "\n") {if(it.third!=-2){ "${it.first} -> ${it.third}" }else {"${it.first} -> <not unique>" }}
+            updatedListString = sortedList.joinToString(separator = "\n")
+            {if(it.third!=-2){ "${it.first} -> ${it.third}" }else {"${it.first} -> <not unique>" }}     //here i put the borda value and the name in the string list
             voteScreen.text = updatedListString
             if(!updatedListString.contains("<not unique>")){
-                val alphabeticList = sortedList.sortedByDescending { it.first }.toMutableList()
+                val alphabeticList = sortedList.sortedByDescending { it.first }.toMutableList()         //now we have to sort the list by the name to prevent points getting to the wrong place
                 stringList.clear()
                 for(i in 0 until numberOptions){
                     stringList.add("${alphabeticList[i].first},${alphabeticList[i].third}")
                 }
-                newStringToPairList.clear()                                                         //the list has to be emptied first
+                newStringToPairList.clear()                                                             //the list has to be emptied first
                 stringList.forEach { string ->
                     val parts = string.split(",")
                     if (parts.size == 2) {
@@ -131,7 +131,6 @@ class MainActivity2 : AppCompatActivity() {
                     }
                 }
             }
-
         }
 
         confirmVoteButton.setOnClickListener {
@@ -139,7 +138,8 @@ class MainActivity2 : AppCompatActivity() {
                 Toast.makeText(this, "Vote is not unique!", Toast.LENGTH_SHORT).show()
             }else {
                 for(i in 0 until numberOptions){
-                    newStringToPairList[i] = Pair(newStringToPairList[i].first, newStringToPairList[i].second+stringToPairList[i].second )
+                    newStringToPairList[i] = Pair(newStringToPairList[i].first,
+                        newStringToPairList[i].second+stringToPairList[i].second )                      //here the points would be assigned wrong if it was not sorted alphabetically
                     stringList[i]="${newStringToPairList[i].first},${newStringToPairList[i].second}"
                 }
                 newStringToPairList = newStringToPairList.sortedByDescending { it.second }.toMutableList()
@@ -148,7 +148,7 @@ class MainActivity2 : AppCompatActivity() {
             }
         }
         cancelVoteButton.setOnClickListener {
-            Toast.makeText(this, "Vote has been canelled!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Vote has been canceled!", Toast.LENGTH_SHORT).show()
             stringList.clear()
             for(i in 0 until numberOptions){
                 stringList.add("${stringToPairList[i].first},${stringToPairList[i].second}")
@@ -172,13 +172,8 @@ class MainActivity2 : AppCompatActivity() {
                     seekBarValues[i] = progress
                     calculateResults()
                 }
-
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {
-
-                }
-
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {
-                }
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
             }
             bar.setOnSeekBarChangeListener(listener)
         }

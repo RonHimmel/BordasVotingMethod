@@ -21,11 +21,13 @@ import androidx.core.view.WindowInsetsCompat
 class MainActivity : AppCompatActivity() {
 
     private lateinit var activityLauncher: ActivityResultLauncher<Intent>
+    //this section contains the variables later used in the intent
     private var savedNumberOptions = 0
     private var savedTextOptions: String? = null
     private var savedNumberVotes = 0
     private var savedPairList: String? = null
     private var savedStringList: ArrayList<String>? = null
+    //this acts like a mutex to ensure that we do not get into a loop after a text/number change
     private var isClear = true
 
 
@@ -62,10 +64,9 @@ class MainActivity : AppCompatActivity() {
                         savedStringList = extras.getStringArrayList("savedStringList")
 
                         isClear = false
-                        numberOfVotes.text =
-                            savedNumberVotes.toString()                                            // if we come from the second activity the # of votes is rewritten
+                        numberOfVotes.text = savedNumberVotes.toString()                                            // if we come from the second activity the # of votes is rewritten
                         intOptions.setText(savedNumberOptions.toString())                                           // also the # of options are displayed again
-                        textOptions.setText(savedTextOptions)
+                        textOptions.setText(savedTextOptions)                                                       // the options are displayed again
                         isClear = true
                         switchResults.isChecked = false
                         //ensures to close the keyboard
@@ -79,12 +80,10 @@ class MainActivity : AppCompatActivity() {
                     }
 
                 } else if (result.resultCode == RESULT_CANCELED) {
-                    // Handle cancellation if needed
                 }
             }
 
-
-        intOptions.setOnFocusChangeListener { _, hasFocus ->
+        intOptions.setOnFocusChangeListener { _, hasFocus ->                                        //here we automatically set the number of options to the max or min value
             if (!hasFocus) {
                 isClear=false
                 if (intOptions.text.toString().toInt()>10){
@@ -95,14 +94,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
-        startOverButton.setOnClickListener{                                                  // here we delete all user inputs to start a new vote
-            intOptions.setText("0")
+        fun clear(){
             numberOfVotes.text = "0"
-            textOptions.setText("")
             savedStringList?.clear()
             savedPairList=""
             savedTextOptions=""
+            switchResults.isChecked = false
+        }
+
+        startOverButton.setOnClickListener{                                                  // here we delete all user inputs to start a new vote
+            intOptions.setText("0")
+            textOptions.setText("")
+            clear()
             switchResults.isChecked = false
         }
 
@@ -110,21 +113,13 @@ class MainActivity : AppCompatActivity() {
 
         textOptions.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                // This method is called to notify you that the text is about to change
             }
-
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                // This method is called to notify you that the text has changed
-
             }
-
             override fun afterTextChanged(s: Editable?) {
-                // This method is called to notify you that somewhere within s, the text has been changed
+                // If text is changed and we did not clear everything already then we clear everything and set the flag to true
                 if(isClear) {
-                    numberOfVotes.text = "0"
-                    savedStringList?.clear()
-                    savedPairList = ""
-                    savedTextOptions = ""
+                    clear()
                     isClear=false
                     intOptions.text.clear()
                 }
@@ -144,10 +139,7 @@ class MainActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 // This method is called to notify you that somewhere within s, the text has been changed
                 if(isClear) {
-                    numberOfVotes.text = "0"
-                    savedStringList?.clear()
-                    savedPairList = ""
-                    savedTextOptions = ""
+                    clear()
                     isClear=false
                     textOptions.text.clear()
                 }
@@ -157,11 +149,10 @@ class MainActivity : AppCompatActivity() {
         fun goToSecondActivity(){
             val numberInput = intOptions.text.toString()
             val numberOptions = numberInput.toInt()
-            val numberVotes = numberOfVotes.text.toString().toInt() + 1                         //adds 1 to the voting counter
-            val inputText = if(savedTextOptions!=null&&savedTextOptions!="")savedTextOptions
+            val numberVotes = numberOfVotes.text.toString().toInt() + 1                             //adds 1 to the voting counter
+            val inputText = if(savedTextOptions!=null&&savedTextOptions!="")savedTextOptions        //if we already have the options we use them instead of the user input
             else textOptions.text.toString()
-            val options =
-                inputText?.split(",")?.map { it.trim() }                        //splits the string into the different options using the split method with ","
+            val options = inputText?.split(",")?.map { it.trim() }                        //splits the string into the different options using the split method with ","
 
             val myIntent = Intent(this, MainActivity2::class.java)
             val bundle = Bundle();
@@ -198,10 +189,10 @@ class MainActivity : AppCompatActivity() {
                 var i = 0
                 if (result != null) {
                     do{
-                        if(result[i+1]==result[1]){
+                        if(result[i+1]==result[1]){                                                 //the list is sorted so the first element is always the winner and if another option has the same points it wins as well
                             resultText=resultText+"***"+result[i]+ " -> "+ result[i+1]+"***\n"
                         }else resultText=resultText +result[i]+" -> "+ result[i+1]+"\n"
-                        i += 2
+                        i += 2                                                                      // it is split into pairs therefore we add 2 to get to the next pair
                     }while(i<result.size)
                 }
                 resultVotes.text = resultText
