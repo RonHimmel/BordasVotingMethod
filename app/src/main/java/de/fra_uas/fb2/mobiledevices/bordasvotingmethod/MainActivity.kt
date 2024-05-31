@@ -100,6 +100,7 @@ class MainActivity : AppCompatActivity() {
             savedPairList=""
             savedTextOptions=""
             switchResults.isChecked = false
+            Toast.makeText(this, "Starting anew!", Toast.LENGTH_SHORT).show()
         }
 
         startOverButton.setOnClickListener{                                                  // here we delete all user inputs to start a new vote
@@ -121,7 +122,6 @@ class MainActivity : AppCompatActivity() {
                 if(isClear) {
                     clear()
                     isClear=false
-                    intOptions.text.clear()
                 }
             }
         })
@@ -141,7 +141,6 @@ class MainActivity : AppCompatActivity() {
                 if(isClear) {
                     clear()
                     isClear=false
-                    textOptions.text.clear()
                 }
             }
         })
