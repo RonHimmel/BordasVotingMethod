@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private var savedPairList: String? = null
     private var savedStringList: ArrayList<String>? = null
     //this acts like a mutex to ensure that we do not get into a loop after a text/number change
-    private var isClear = true
+    private var isClear = false
 
 
     @SuppressLint("UseSwitchCompatOrMaterialCode")
@@ -62,13 +62,10 @@ class MainActivity : AppCompatActivity() {
                         savedNumberVotes = extras.getInt("numberVotes", 0) ?: 0
                         savedPairList = extras.getString("pairList")
                         savedStringList = extras.getStringArrayList("savedStringList")
-
-                        isClear = false
+                        isClear=false
                         numberOfVotes.text = savedNumberVotes.toString()                                            // if we come from the second activity the # of votes is rewritten
                         intOptions.setText(savedNumberOptions.toString())                                           // also the # of options are displayed again
                         textOptions.setText(savedTextOptions)                                                       // the options are displayed again
-                        isClear = true
-                        switchResults.isChecked = false
                         //ensures to close the keyboard
                         intOptions.clearFocus()
                         textOptions.clearFocus()
@@ -77,8 +74,9 @@ class MainActivity : AppCompatActivity() {
                             val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
                             imm.hideSoftInputFromWindow(view.windowToken, 0)
                         }
+                        isClear = true
+                        switchResults.isChecked = false
                     }
-
                 } else if (result.resultCode == RESULT_CANCELED) {
                 }
             }
@@ -133,7 +131,6 @@ class MainActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 // This method is called to notify you that the text has changed
-
             }
 
             override fun afterTextChanged(s: Editable?) {

@@ -26,10 +26,10 @@ class MainActivity2 : AppCompatActivity() {
 
 
         val bundle = intent.extras
-        val numberOptions = bundle!!.getInt("numberOptions") ?: 0
+        val numberOptions = bundle!!.getInt("numberOptions")
         val options = bundle.getStringArrayList("options")
         val text = bundle.getString("textOptions")
-        val savedNumberVotes = bundle.getInt("numberVotes") ?: 0
+        val savedNumberVotes = bundle.getInt("numberVotes")
 
 
 
@@ -156,10 +156,10 @@ class MainActivity2 : AppCompatActivity() {
             intentions(0)
         }
 
-        for (i in 0 until numberOptions) {
+        for (i in 0 until numberOptions) {                                                      //creates the seekbars and the textviews
             val bar = SeekBar(this)
             bar.progress = 0
-            seekBarValues[i] = bar.progress
+            seekBarValues[i] = bar.progress                                                             //the array is filled with 0
             seekBar.add(bar)
             val seekBarName = if (i < options!!.size&& options[i]!="") options[i] else "Option ${i+1}"
             val textView = TextView(this)
@@ -167,9 +167,9 @@ class MainActivity2 : AppCompatActivity() {
             seekBarsLayout.addView(textView)
             seekBarsLayout.addView(bar)
 
-            val listener = object : SeekBar.OnSeekBarChangeListener {
+            val listener = object : SeekBar.OnSeekBarChangeListener {                                   //each seekbar has its own listener
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    seekBarValues[i] = progress
+                    seekBarValues[i] = progress                                                         //the progress is put in the array
                     calculateResults()
                 }
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {}
